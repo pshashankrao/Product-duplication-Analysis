@@ -35,6 +35,11 @@
             margin-top: 20px;
             padding: 10px 20px;
             font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
         }
         .image-container {
             display: flex;
@@ -74,7 +79,7 @@
     <!-- Result Section -->
     <div id="result" class="result">Result: </div>
 
-    <!-- Bar Button -->
+    <!-- Redirect Button -->
     <button id="barBtn" class="bar-btn">Go to Bar Page</button>
 
     <!-- Include Resemble.js and OpenCV.js -->
@@ -96,16 +101,21 @@
         // Function to handle Resemble.js comparison
         function compareWithResemble(fraudImageSrc, originalImageSrc) {
             resemble(fraudImageSrc).compareTo(originalImageSrc).onComplete(function(data){
-                console.log(data);
-                result.textContent += " similarity from Image 1: " + data.misMatchPercentage + "% difference.";
-
-                // Record activity in localStorage
-                recordActivity(fraudImageSrc, originalImageSrc, "Image comparison completed");
+                console.log("Resemble.js comparison complete:", data);
+                result.textContent += " Similarity from Image 1: " + data.misMatchPercentage + "% difference.";
+                
+                // Make button visible after comparison
+                barBtn.style.display = 'inline-block';
             });
         }
 
         // Function to handle SSIM comparison using OpenCV.js
         function compareWithSSIM(fraudImgElement, originalImgElement) {
+            if (!cv || !cv.imread) {
+                console.error("OpenCV.js not loaded yet!");
+                return;
+            }
+
             const fraudMat = cv.imread(fraudImgElement);
             const originalMat = cv.imread(originalImgElement);
             
@@ -115,7 +125,7 @@
             cv.cvtColor(fraudMat, fraudGray, cv.COLOR_RGBA2GRAY, 0);
             cv.cvtColor(originalMat, originalGray, cv.COLOR_RGBA2GRAY, 0);
 
-            // Compute SSIM (here just for demo, you'd need to implement full SSIM logic or use an available one)
+            // Compute SSIM similarity
             const diff = new cv.Mat();
             cv.absdiff(fraudGray, originalGray, diff); 
             const nonZero = cv.countNonZero(diff);
@@ -152,22 +162,7 @@
             }
         }
 
-        // Function to record activity
-        function recordActivity(fraudImageSrc, originalImageSrc, activityDesc) {
-            const activities = JSON.parse(localStorage.getItem('activities')) || [];
-            const timestamp = new Date().toLocaleString();
-
-            const newActivity = {
-                timestamp,
-                fraudImage: fraudImageSrc,
-                originalImage: originalImageSrc,
-                activity: activityDesc
-            };
-
-            activities.push(newActivity);
-            localStorage.setItem('activities', JSON.stringify(activities));
-        }
-
+        // Event Listeners
         fraudUpload.addEventListener('change', function(e) {
             handleImageUpload(e, true);
         });
@@ -175,20 +170,22 @@
         originalUpload.addEventListener('change', function(e) {
             handleImageUpload(e, false);
             loading.style.display = 'block';
-            
+
             // Simulate loading process for comparison
             setTimeout(() => {
                 loading.style.display = 'none';
                 result.style.display = 'block';
-                
+
+                console.log("Starting comparison...");
+
                 // Perform image comparison using Resemble.js
                 compareWithResemble(fraudImageSrc, originalImageSrc);
-                
-                // Perform SSIM comparison using OpenCV.js
-                compareWithSSIM(fraudImage, originalImage);
 
-                barBtn.style.display = 'inline-block'; // Show the Bar button
-            }, 3000); // Simulate a 3-second comparison process
+                // Perform SSIM comparison using OpenCV.js (with a slight delay to ensure OpenCV is loaded)
+                setTimeout(() => {
+                    compareWithSSIM(fraudImage, originalImage);
+                }, 1000);
+            }, 3000);
         });
 
         barBtn.addEventListener('click', function() {
