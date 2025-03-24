@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload and Comparison</title>
+    <style>
+        body {
+            background-image: url('fraud.jpg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100% 100%;
+            height: 100vh; 
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input[type="file"] {
+            margin: 20px;
+        }
+        .loading {
+            display: none;
+            font-size: 20px;
+            color: #4CAF50;
+        }
+        .result {
+            font-size: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        .bar-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .image-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .image-container img {
+            width: 300px;
+            height: 300px;
+            margin: 0 20px;
+            object-fit: contain;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Image Upload and Fraud Detection</h1>
+    
+    <!-- Fraud Image Upload -->
+    <label for="fraudUpload">Upload Image 1:</label>
+    <input type="file" id="fraudUpload" accept=".png, .jpeg, .jpg"><br>
+
+    <!-- Original Image Upload -->
+    <label for="originalUpload">Upload Image 2:</label>
+    <input type="file" id="originalUpload" accept=".png, .jpeg, .jpg"><br>
+
+    <!-- Loading Page -->
+    <div id="loading" class="loading">Comparing both the images...</div>
+
+    <!-- Image Display -->
+    <div class="image-container">
+        <img id="fraudImage" src="" alt="Image 1">
+        <img id="originalImage" src="" alt="Image 2">
+    </div>
+
+    <!-- Result Section -->
+    <div id="result" class="result">Result: </div>
+
+    <!-- Bar Button -->
+    <button id="barBtn" class="bar-btn">Go to Bar Page</button>
+
+    <!-- Include Resemble.js and OpenCV.js -->
+    <script src="https://cdn.rawgit.com/Huddle/Resemble.js/master/resemble.js"></script>
+    <script async src="https://docs.opencv.org/master/opencv.js"></script>
+
+    <script>
+        const fraudUpload = document.getElementById('fraudUpload');
+        const originalUpload = document.getElementById('originalUpload');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const barBtn = document.getElementById('barBtn');
+        
+        const fraudImage = document.getElementById('fraudImage');
+        const originalImage = document.getElementById('originalImage');
+        
+        let fraudImageSrc, originalImageSrc;
+
+        // Function to handle Resemble.js comparison
+        function compareWithResemble(fraudImageSrc, originalImageSrc) {
+            resemble(fraudImageSrc).compareTo(originalImageSrc).onComplete(function(data){
+                console.log(data);
+                result.textContent += " similarity from Image 1: " + data.misMatchPercentage + "% difference.";
+
+                // Record activity in localStorage
+                recordActivity(fraudImageSrc, originalImageSrc, "Image comparison completed");
+            });
+        }
+
+        // Function to handle SSIM comparison using OpenCV.js
+        function compareWithSSIM(fraudImgElement, originalImgElement) {
+            const fraudMat = cv.imread(fraudImgElement);
+            const originalMat = cv.imread(originalImgElement);
+            
+            // Convert to grayscale
+            const fraudGray = new cv.Mat();
+            const originalGray = new cv.Mat();
+            cv.cvtColor(fraudMat, fraudGray, cv.COLOR_RGBA2GRAY, 0);
+            cv.cvtColor(originalMat, originalGray, cv.COLOR_RGBA2GRAY, 0);
+
+            // Compute SSIM (here just for demo, you'd need to implement full SSIM logic or use an available one)
+            const diff = new cv.Mat();
+            cv.absdiff(fraudGray, originalGray, diff); 
+            const nonZero = cv.countNonZero(diff);
+            const ssimScore = 1 - (nonZero / (fraudGray.cols * fraudGray.rows));
+
+            result.textContent += " SSIM score: " + (ssimScore * 100).toFixed(2) + "% similarity.";
+
+            // Cleanup
+            fraudMat.delete();
+            originalMat.delete();
+            fraudGray.delete();
+            originalGray.delete();
+            diff.delete();
+        }
+
+        // Function to handle image uploads
+        function handleImageUpload(event, isFraudImage) {
+            const file = event.target.files[0];
+            if (file && (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/jpg')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (isFraudImage) {
+                        fraudImage.src = e.target.result;
+                        fraudImageSrc = e.target.result;
+                    } else {
+                        originalImage.src = e.target.result;
+                        originalImageSrc = e.target.result;
+                    }
+                }
+                reader.readAsDataURL(file);
+                alert((isFraudImage ? 'Fraud' : 'Original') + ' image uploaded successfully');
+            } else {
+                alert('Please upload a valid image file (.png, .jpeg, .jpg)');
+            }
+        }
+
+        // Function to record activity
+        function recordActivity(fraudImageSrc, originalImageSrc, activityDesc) {
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            const timestamp = new Date().toLocaleString();
+
+            const newActivity = {
+                timestamp,
+                fraudImage: fraudImageSrc,
+                originalImage: originalImageSrc,
+                activity: activityDesc
+            };
+
+            activities.push(newActivity);
+            localStorage.setItem('activities', JSON.stringify(activities));
+        }
+
+        fraudUpload.addEventListener('change', function(e) {
+            handleImageUpload(e, true);
+        });
+
+        originalUpload.addEventListener('change', function(e) {
+            handleImageUpload(e, false);
+            loading.style.display = 'block';
+            
+            // Simulate loading process for comparison
+            setTimeout(() => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                // Perform image comparison using Resemble.js
+                compareWithResemble(fraudImageSrc, originalImageSrc);
+                
+                // Perform SSIM comparison using OpenCV.js
+                compareWithSSIM(fraudImage, originalImage);
+
+                barBtn.style.display = 'inline-block'; // Show the Bar button
+            }, 3000); // Simulate a 3-second comparison process
+        });
+
+        barBtn.addEventListener('click', function() {
+            window.location.href = "bar.html"; // Redirect to bar page
+        });
+    </script>
+
+</body>
+</html>

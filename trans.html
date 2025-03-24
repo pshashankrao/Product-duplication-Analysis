@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            margin: 0;
+            background-image: url('fraud.jpg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100% 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Transaction Page</h2>
+
+        <label for="product">Select Original Product:</label>
+        <select id="product" onchange="updatePrice()">
+            <option value="">Select Product</option>
+            <option value="27">Milk - 27</option>
+            <option value="10">Dairy Milk - 10</option>
+            <option value="20">Pepper - 20</option>
+            <option value="60">Long Book - 60</option>
+            <option value="120">Break - 120</option>
+            <option value="5">Nut - 5</option>
+            <option value="5">Screw - 5</option>
+            <option value="100">Screw Driver - 100</option>
+            <option value="250">Hammer - 250</option>
+            <!-- Additional products from the provided list -->
+            <option value="150">Advanced Publishing Inc. - 150</option>
+            <option value="170">Eco Paperworks Group - 170</option>
+            <option value="100">Advanced Printworks Holdings - 100</option>
+            <option value="250">Green Publications Enterprises - 250</option>
+            <option value="50">Ultimate Publications Inc. - 50</option>
+            <option value="70">Pro Printing International - 70</option>
+            <option value="50">Eco Paper Partners - 50</option>
+            <option value="100">Universal Paper Partners - 100</option>
+            <option value="150">Premier Printing Partners - 150</option>
+            <option value="10">Curd - 10</option>
+            <option value="60">Butter - 60</option>
+            <option value="10">Lays - 10</option>
+            <option value="70">Red Wine Vinegar - 70</option>
+            <option value="100">White Wine Vinegar - 100</option>
+            <option value="100">Toothpaste - 100</option>
+            <option value="10">Shampoo - 10</option>
+            <option value="10">Soap - 10</option>
+            <option value="150">Detergent - 150</option>
+            <option value="150">Toilet Paper - 150</option>
+            <option value="250">Paper Towels - 250</option>
+            <option value="1500">Alternator - 1500</option>
+            <option value="2000">Spark Plug - 2000</option>
+            <option value="1700">Brake Pad - 1700</option>
+            <option value="5000">Battery - 5000</option>
+            <option value="7000">Battery - 7000</option>
+            <option value="1500">Clutch Pad - 1500</option>
+            <option value="10000">Engine - 10000</option>
+            <option value="3000">Engine Bearing - 3000</option>
+            <option value="5000">Tire - 5000</option>
+        </select>
+
+        <label for="originalPrice">Original Product Price:</label>
+        <input type="text" id="originalPrice" readonly>
+
+        <label for="fakePrice">Enter Fake Product Price:</label>
+        <input type="text" id="fakePrice">
+
+        <button onclick="addTransaction()">Add Transaction</button>
+
+        <canvas id="priceChart" width="400" height="200"></canvas>
+
+        <!-- New button to link to buttons.html -->
+        <button onclick="window.location.href='buttons.html'">Go to Buttons Page</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let originalSum = 0;
+        let fakeSum = 0;
+        let chart;
+
+        function updatePrice() {
+            const productSelect = document.getElementById('product');
+            const originalPriceInput = document.getElementById('originalPrice');
+            originalPriceInput.value = productSelect.value;
+        }
+
+        function addTransaction() {
+            const fakePrice = parseFloat(document.getElementById('fakePrice').value);
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value);
+
+            if (isNaN(fakePrice) || isNaN(originalPrice)) {
+                alert('Please select a product and enter a valid fake product price');
+                return;
+            }
+
+            // Accumulate the prices correctly without doubling
+            originalSum += originalPrice;
+            fakeSum += fakePrice;
+
+            // Update the graph
+            updateGraph();
+        }
+
+        function updateGraph() {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            if (!chart) {
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Original Product Sum', 'Fake Product Sum'],
+                        datasets: [{
+                            label: 'Price Comparison',
+                            data: [originalSum, fakeSum],
+                            backgroundColor: ['#4CAF50', '#FF5722'],
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } else {
+                chart.data.datasets[0].data = [originalSum, fakeSum];
+                chart.update();
+            }
+        }
+    </script>
+
+</body>
+</html>
++

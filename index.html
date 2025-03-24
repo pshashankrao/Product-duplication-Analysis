@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up & Login with OTP</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('fraud.jpg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100% 100%;
+        }
+
+        .container {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        h2 {
+            text-align: center;
+            animation: slide-in 2s ease-out, fade-in 2s;
+        }
+
+        input[type="text"], input[type="password"], input[type="tel"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #5cb85c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Admin button styling */
+        .admin-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .admin-button:hover {
+            background-color: #e64a19;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- Admin Button -->
+    <button class="admin-button" onclick="showAdminLogin()">Admin</button>
+
+    <!-- Admin Login Container -->
+    <div class="container" id="admin-container" style="display: none;">
+        <h2>Admin Login</h2>
+        <input type="text" id="admin_username" placeholder="Admin Username" required>
+        <input type="password" id="admin_password" placeholder="Admin Password" required>
+        <button onclick="adminLogin()">Login as Admin</button>
+    </div>
+
+    <div class="container" id="signup-container">
+        <h2>Customer Sign Up</h2>
+        <input type="text" id="signup_username" placeholder="Username" required>
+        <input type="password" id="signup_password" placeholder="Password" required>
+        <input type="tel" id="signup_phone" placeholder="Phone Number" required>
+        <input type="number" id="signup_otp" placeholder="Enter OTP" style="display: none;" required>
+
+        <button onclick="generateOTP()">Generate OTP</button>
+        <p style="width: 20%;"><button onclick="signup()" style="display:none;" id="signup-btn">Sign Up</button></p>
+    </div>
+
+    <div class="container" id="login-container" style="display:none;">
+        <h2>Customer Login</h2>
+        <input type="text" id="login_username" placeholder="Username" required>
+        <input type="password" id="login_password" placeholder="Password" required>
+        <input type="number" id="login_otp" placeholder="Enter OTP" required>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div class="container" id="button-container" style="display:none;">
+        <h1 style="letter-spacing: 2px;">Fradud Detection Space</h1>
+        <h2>Image Comparison Detection</h2>
+        <div class="button-container">
+            <p style="width: 60%;">
+                <button onclick="window.location.href='comp.html'">Image Comparison</button>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let generatedOtp;
+
+        function generateOTP() {
+            const phone = document.getElementById('signup_phone').value;
+            if (phone.length === 10) {
+                generatedOtp = Math.floor(100000 + Math.random() * 900000); // Generate 6-digit OTP
+                alert('Your OTP is: ' + generatedOtp); // In reality, OTP would be sent to the phone
+                document.getElementById('signup_otp').style.display = 'block';
+                document.getElementById('signup-btn').style.display = 'block';
+            } else {
+                alert('Please enter a valid 10-digit phone number.');
+            }
+        }
+
+        function signup() {
+            const username = document.getElementById('signup_username').value;
+            const password = document.getElementById('signup_password').value;
+            const enteredOtp = document.getElementById('signup_otp').value;
+
+            if (username && password && enteredOtp == generatedOtp) {
+                localStorage.setItem('username', username);
+                localStorage.setItem('password', password);
+                localStorage.setItem('otp', generatedOtp); // Store OTP for verification during login
+                alert('Sign Up Successful!');
+                document.getElementById('signup-container').style.display = 'none';
+                document.getElementById('login-container').style.display = 'block';
+            } else {
+                alert('Please enter all details correctly.');
+            }
+        }
+
+        function login() {
+            const username = document.getElementById('login_username').value;
+            const password = document.getElementById('login_password').value;
+            const enteredOtp = document.getElementById('login_otp').value;
+
+            const storedUsername = localStorage.getItem('username');
+            const storedPassword = localStorage.getItem('password');
+            const storedOtp = localStorage.getItem('otp');
+
+            if (username === storedUsername && password === storedPassword && enteredOtp == storedOtp) {
+                alert('Login Successful!');
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('button-container').style.display = 'block';
+            } else {
+                alert('Invalid username, password, or OTP.');
+            }
+        }
+
+        // Function to show the admin login container
+        function showAdminLogin() {
+            document.getElementById('admin-container').style.display = 'block';
+            document.getElementById('signup-container').style.display = 'none';
+            document.getElementById('login-container').style.display = 'none';
+        }
+
+        // Function for admin login
+        function adminLogin() {
+            const adminUsername = document.getElementById('admin_username').value;
+            const adminPassword = document.getElementById('admin_password').value;
+
+            // Check if admin credentials are correct
+            if (adminUsername === 'admin' && adminPassword === 'admin') {
+                alert('Admin Login Successful!');
+                window.location.href = 'admin.html'; // Redirect to admin page
+            } else {
+                alert('Invalid Admin Credentials!');
+            }
+        }
+    </script>
+
+</body>
+
+</html>

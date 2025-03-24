@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            background-color: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid white;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Admin Dashboard</h1>
+
+    <h2>Image Upload Activity Log</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Image 1</th>
+                <th>Image 2</th>
+                <th>Activity</th>
+            </tr>
+        </thead>
+        <tbody id="activityLog">
+            <!-- Activities will be injected here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Function to load activities from localStorage
+        function loadActivities() {
+            const activities = JSON.parse(localStorage.getItem('activities')) || [];
+            const activityLog = document.getElementById('activityLog');
+
+            // Clear the current activity log
+            activityLog.innerHTML = '';
+
+            // Loop through each activity and add it to the table
+            activities.forEach(activity => {
+                const row = document.createElement('tr');
+
+                // Add timestamp
+                const timestampCell = document.createElement('td');
+                timestampCell.textContent = activity.timestamp;
+                row.appendChild(timestampCell);
+
+                // Add fraud image
+                const fraudImageCell = document.createElement('td');
+                const fraudImg = document.createElement('img');
+                fraudImg.src = activity.fraudImage;
+                fraudImageCell.appendChild(fraudImg);
+                row.appendChild(fraudImageCell);
+
+                // Add original image
+                const originalImageCell = document.createElement('td');
+                const originalImg = document.createElement('img');
+                originalImg.src = activity.originalImage;
+                originalImageCell.appendChild(originalImg);
+                row.appendChild(originalImageCell);
+
+                // Add activity description
+                const activityCell = document.createElement('td');
+                activityCell.textContent = activity.activity;
+                row.appendChild(activityCell);
+
+                // Append the row to the table
+                activityLog.appendChild(row);
+            });
+        }
+
+        // Load activities when the page is loaded
+        window.onload = loadActivities;
+    </script>
+
+</body>
+</html>

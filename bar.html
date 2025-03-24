@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Barcode & Licence Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            margin: 0;
+            background-image: url('fraud.jpg');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100% 100%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #result, #license {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .link-button {
+            background-color: #007bff;
+            margin-top: 10px;
+        }
+
+        .link-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color: #ffffff;">Product Barcode & Licence Checker</h1>
+
+    <div class="container">
+        <label for="product-select">Select Product:</label>
+        <select id="product-select" onchange="displayLicense()">
+            <option value="">--Select a Product--</option>
+            <option value="3488035257619" data-license="ZU-8388948">Advanced Publishing Inc.</option>
+            <option value="3156432759351" data-license="HV-9605406">Eco Paperworks Group</option>
+            <option value="2860905094683" data-license="CB-8023203">Advanced Printworks Holdings</option>
+            <option value="4523512851890" data-license="CD-8521416">Green Publications Enterprises</option>
+            <option value="6449322897869" data-license="MR-7155539">Ultimate Publications Inc.</option>
+            <option value="2778026870482" data-license="KJ-5227124">Pro Printing International</option>
+            <option value="4180222351548" data-license="MD-9936183">Eco Paper Partners</option>
+            <option value="3073962645013" data-license="UK-9298958">Universal Paper Partners</option>
+            <option value="8724750230569" data-license="EH-3245793">Premier Printing Partners</option>
+        </select>
+
+        <label for="barcode-input">Enter Barcode:</label>
+        <input type="text" id="barcode-input" placeholder="Enter barcode number">
+
+        <button onclick="compareBarcode()">Check Barcode</button>
+
+        <p id="result"></p>
+        <p id="license"></p>
+
+        <!-- New Button to Link to trans.html -->
+        <button class="link-button" onclick="redirectToTransPage()">Go to Transactions Page</button>
+    </div>
+
+    <script>
+        function displayLicense() {
+            const productSelect = document.getElementById('product-select');
+            const licenseDisplay = document.getElementById('license');
+            
+            // Get the license number from the selected option
+            const selectedOption = productSelect.options[productSelect.selectedIndex];
+            const licenseNumber = selectedOption.getAttribute('data-license');
+            
+            if (licenseNumber) {
+                licenseDisplay.textContent = `License Number: ${licenseNumber}`;
+                licenseDisplay.style.color = "black";
+            } else {
+                licenseDisplay.textContent = "";
+            }
+        }
+
+        function compareBarcode() {
+            const productSelect = document.getElementById('product-select');
+            const enteredBarcode = document.getElementById('barcode-input').value;
+            const result = document.getElementById('result');
+
+            // Get the original barcode based on the selected product
+            const originalBarcode = productSelect.value;
+
+            if (!originalBarcode) {
+                result.textContent = "Please select a product.";
+                result.style.color = "red";
+                return;
+            }
+
+            // Compare entered barcode with the original barcode
+            if (enteredBarcode === originalBarcode) {
+                result.textContent = "Barcode is correct!";
+                result.style.color = "green";
+            } else {
+                result.textContent = "Barcode does not match!";
+                result.style.color = "red";
+            }
+        }
+
+        // Function to redirect to trans.html
+        function redirectToTransPage() {
+            window.location.href = 'trans.html';
+        }
+    </script>
+</body>
+</html>
